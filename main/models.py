@@ -7,10 +7,10 @@ class Category(models.Model):
     slug = models.CharField(max_length=100, unique=True)
 
 
-    def save(self, args, kwargs):
+    def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
-        super().save(args, kwargs)
+        super().save(*args, **kwargs)
 
 
     def __str__(self):
@@ -27,14 +27,13 @@ class Size(models.Model):
 
 class ProductSize(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE,
-                                related_name='product_size')
-    size = models.ForeignKey('Size', on_delete=models.CASCADE)
+                                related_name='product_sizes')
+    size = models.ForeignKey(Size, on_delete=models.CASCADE)
     stock = models.PositiveIntegerField(default=0)
 
 
     def __str__(self):
         return f"{self.size.name} ({self.stock} in stock) for {self.product.name}"
-
 
 
 class Product(models.Model):
@@ -50,16 +49,17 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-    def save(self, args, kwargs):
+    def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
-        super().save(args, kwargs)
+        super().save(*args, **kwargs)
 
-        def __str__(self):
-            return self.name
+
+    def __str__(self):
+        return self.name
 
 
 class ProductImage(models.Model):
-    product = models.ForeignKey('Product', on_delete=models.CASCADE,
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,
                                 related_name='images')
-    image = models.ImageField(upload_to='products/extra')
+    image = models.ImageField(upload_to='products/extra/')
