@@ -1,4 +1,5 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView, DetailView
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
@@ -18,7 +19,7 @@ class IndexView(TemplateView):
 
 
     def get(self, request, *args, **kwargs):
-        context = self.get_context_data(kwargs)
+        context = self.get_context_data(**kwargs)
         if request.headers.get('HX-Request'):
             return TemplateResponse(request, 'main/home_content.html', context)
         return TemplateResponse(request, self.template_name, context)
@@ -31,7 +32,7 @@ class CatalogView(TemplateView):
         'color': lambda queryset, value: queryset.filter(color__iexact=value),
         'min_price': lambda queryset, value: queryset.filter(price_gte=value),
         'max_price': lambda queryset, value: queryset.filter(price_lte=value),
-        'size': lambda queryset, value: queryset.filter(product_size__size__name=value),
+        'size': lambda queryset, value: queryset.filter(product_sizes__size__name=value),
     }
 
     def get_context_data(self, **kwargs):
@@ -45,8 +46,7 @@ class CatalogView(TemplateView):
             current_category = get_object_or_404(Category, slug=category_slug)
             products = products.filter(category=current_category)
 
-
-        query = self.request.Get.get('q')
+        query = self.request.GET.get('q')
         if query:
             products = products.filter(
                 Q(name__icontains=query) | Q(description__icontains=query)
@@ -54,7 +54,7 @@ class CatalogView(TemplateView):
 
         filter_params = {}
         for param, filter_func in self.FILTER_MAPPING.items():
-            value = self.request.Get.get(param)
+            value = self.request.GET.get(param)
             if value:
                 products = filter_func(products, value)
                 filter_params[param] = value
@@ -72,16 +72,16 @@ class CatalogView(TemplateView):
             'search_query': query or ''
         })
 
-        if self.request.Get.get('show_search') == 'true':
+        if self.request.GET.get('show_search') == 'true':
             context['show_search'] = True
-        elif self.request.Get.get('reset_serch') == 'true':
+        elif self.request.GET.get('reset_search') == 'true':
             context['reset_search'] = True
 
         return context
 
 
     def get(self, request, *args, **kwargs):
-        context = self.get_context_data(kwargs)
+        context = self.get_context_data(**kwargs)
         if request.headers.get('HX-Request'):
             if context.get('show_search'):
                 return TemplateResponse(request, 'main/search_input.html', context)
@@ -113,6 +113,6 @@ class ProductDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         context = self.get_context_data(**kwargs)
-        if request.header.get('HX_Request'):
+        if request.headers.get('HX-Request'):
             return TemplateResponse(request, 'main/product_detail.html', context)
         raise TemplateResponse(request, self.template_name, context)
