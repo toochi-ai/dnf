@@ -12,3 +12,8 @@ urlpatterns = [
     path('clear/', views.ClearCartView.as_view(), name='clear_cart'),
     path('summary', views.CartSummaryView.as_view(), name='cart_summary'),
 ]
+
+
+
+# 3:55
+# 3:55

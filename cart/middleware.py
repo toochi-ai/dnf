@@ -11,3 +11,4 @@ class CartMiddleware(MiddlewareMixin):
             session_key=request.session.session_key
         )
         return None
+    

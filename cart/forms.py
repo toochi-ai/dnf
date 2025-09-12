@@ -33,3 +33,4 @@ class UpdateCartItemForm(forms.ModelForm):
             self.fields['quantity'].validators.append(
                 forms.validators.MaxValueValidator(self.instance.product_size.stock)
             )
+            
